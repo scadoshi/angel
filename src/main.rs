@@ -3,7 +3,7 @@ mod config;
 mod token;
 
 use crate::{action::Action, config::Config, token::Token};
-use chrono::Utc;
+use jiff::Zoned;
 use reqwest::{blocking::Client, StatusCode};
 
 fn main() -> anyhow::Result<()> {
@@ -18,7 +18,7 @@ fn main() -> anyhow::Result<()> {
     println!("✔  Authenticated");
     let action = Action::new(
         "Rust App",
-        Utc::now().naive_utc(),
+        Zoned::now().datetime(),
         "<b>bold note</b>",
         "Note Added via API",
         3132,

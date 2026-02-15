@@ -1,16 +1,10 @@
-use chrono::NaiveDateTime;
+use jiff::civil::DateTime;
 use serde::Serialize;
-use serde::Serializer;
-
-fn serialize_datetime<S: Serializer>(dt: &NaiveDateTime, s: S) -> Result<S::Ok, S::Error> {
-    s.serialize_str(&dt.to_string())
-}
 
 #[derive(Serialize, Debug)]
 pub struct Action {
     who: String,
-    #[serde(serialize_with = "serialize_datetime")]
-    datetime: NaiveDateTime,
+    datetime: DateTime,
     note_html: String,
     outcome: String,
     ticket_id: u32,
@@ -19,7 +13,7 @@ pub struct Action {
 impl Action {
     pub fn new(
         who: impl Into<String>,
-        datetime: NaiveDateTime,
+        datetime: DateTime,
         note_html: impl Into<String>,
         outcome: impl Into<String>,
         ticket_id: u32,
