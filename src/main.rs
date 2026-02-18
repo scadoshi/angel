@@ -1,41 +1,22 @@
 mod action;
+mod client;
 mod config;
 mod token;
 
-use crate::{action::Action, config::Config, token::Token};
-use jiff::Zoned;
-use reqwest::{blocking::Client, StatusCode};
+use crate::{action::Action, client::AuthenticatedClient};
+use jiff::{tz::TimeZone, Timestamp};
 
 fn main() -> anyhow::Result<()> {
-    let config = Config::new()?;
-    let result = Client::new()
-        .post(config.url.clone().join("auth/token")?)
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .basic_auth(config.client_id, Some(config.client_secret))
-        .body("grant_type=client_credentials&scope=all")
-        .send()?;
-    let token: Token = serde_json::from_str(&result.text()?)?;
+    let mut client = AuthenticatedClient::new()?;
     println!("✔  Authenticated");
     let action = Action::new(
         "Rust App",
-        Zoned::now().datetime(),
-        "<b>bold note</b>",
+        Timestamp::now().to_zoned(TimeZone::UTC).datetime(),
+        "<p><b>Testing actions</b></p><p><ol><li>Item 1</li><li>Item 2</li></ol></p>",
         "Note Added via API",
-        3132,
+        2997,
     );
-    let result = Client::new()
-        .post(config.url.clone().join("api/actions")?)
-        .bearer_auth(token.access_token)
-        .header("Content-Type", "application/json")
-        .json(&[serde_json::to_value(action)?])
-        .send()?;
-    match result.status() {
-        StatusCode::OK | StatusCode::CREATED => println!("✔  Action post succeeded"),
-        _ => {
-            println!("✘  Action post failed");
-            println!("- Status: {:#?}", result.status());
-            println!("- Response: {:?}", result.text());
-        }
-    }
+    client.post_action(action)?;
+    println!("✔  Action Posted");
     Ok(())
 }
