@@ -5,7 +5,7 @@ mod config;
 mod endpoint;
 mod token;
 
-use angel::models::custom_integration::CustomIntegration;
+use mjolnir::models::custom_integration::CustomIntegration;
 
 use crate::{client::AuthenticatedClient, endpoint::Endpoint};
 
